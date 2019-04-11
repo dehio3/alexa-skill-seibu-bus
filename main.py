@@ -9,19 +9,20 @@ from bs4 import BeautifulSoup
     key: 最寄りのバス停名
     value: 検索結果URL
 """
-URL = { \
-"交番前": "http://transfer.navitime.biz/seibubus-dia/pc/location/BusLocationResult?startId=00110462&goalId=00110468" , \
-"都営住宅前": "http://transfer.navitime.biz/seibubus-dia/pc/location/BusLocationResult?startId=00110450&goalId=00110468" \
+URL = {
+    "交番前": "http://transfer.navitime.biz/seibubus-dia/pc/location/BusLocationResult?startId=00110462&goalId=00110468",
+    "都営住宅前": "http://transfer.navitime.biz/seibubus-dia/pc/location/BusLocationResult?startId=00110450&goalId=00110468"
 }
+
 
 def buss_time(url):
     """到着時刻取得関数
-    
+
     Args:
         param1 (str):   西武バスバスロケーションページの検索結果URL
                         以下のサイトより時刻検索を行い、検索結果のURLを入力する
                         http://transfer.navitime.biz/seibubus-dia/pc/map/Top?window=busLocation
-    
+
     Return:
         str: 到着予定時刻 (ex:約10分,約20分,約24)
     """
@@ -33,10 +34,10 @@ def buss_time(url):
     div = soup.find_all("div")
 
     # 変数の初期化
-    time_data = "" # 到着時刻
-    time_list = [] # 到着時刻のリスト
+    time_data = ""  # 到着時刻
+    time_list = []  # 到着時刻のリスト
     print_flg = 0
-    
+
     # for分で全てのdiv要素の中からClass="plannedTime"となっている物を探します
     for tag in div:
 
@@ -52,7 +53,6 @@ def buss_time(url):
                 # message = time_data[1]
                 # 到着時刻をリストに追加
                 time_list.append(time_data[1])
-                #print(message)
             # 出力フラグをリセット
             print_flg = 0
 
@@ -77,30 +77,27 @@ def buss_time(url):
 
     # 到着時間のリストを文字列として連結
     message = ','.join(time_list)
-    
+
     return message
 
+
 def main(event, context):
-    """ 指定したURLリストのから到着時刻を取得しAlexaへJSONデータを返す
-    
-    """
-    
-    #リストの作成
+    # リストの作成
     time_messages = []
-    
+
     for key, value in URL.items():
-        #バス停毎の待ち時間を取得
+        # バス停毎の待ち時間を取得
         time = buss_time(value)
-        
-        #メッセージを作成
+
+        # メッセージを作成
         # ex) 交番前は,約11分,約24分,約28分
-        time_message = '{0}は,{1}'.format(key,time)
-        #全てのバス停のメッセージを結合
+        time_message = '{0}は,{1}'.format(key, time)
+        # 全てのバス停のメッセージを結合
         time_messages.append(time_message)
-    
+
     # リスト型のメッセージを文字列に変更
     message = ','.join(time_messages)
-    
+
     response = {
         'version': '1.0',
         'response': {
@@ -110,10 +107,9 @@ def main(event, context):
             }
         }
     }
-    
+
     return response
 
 
-# テスト用
 if __name__ == '__main__':
     print(main(None, None))
