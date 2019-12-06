@@ -1,0 +1,35 @@
+# https://serverless.com/framework/docs/providers/aws/guide/serverless.yml/
+service:
+  name: alexa-skill-seibu-bus
+
+provider:
+  name: aws
+  runtime: python3.6
+  memorySize: 512
+  timeout: 600
+  stage: ${opt:stage, self:custom.defaultStage}
+  region: us-east-1
+
+functions:
+  alexa-skill-seibu-bus:
+    handler: main.main
+    name: alexa-skill-seibu-bus
+    description: Managed by Serverless Framework
+    events:
+      - alexaSkill: ${opt:alexaskill}
+
+package:
+  exclude:
+    - .venv/**
+    - node_modules/**
+    - __pycache__/**
+    - chromedriver/**
+
+plugins:
+  - serverless-python-requirements
+  - serverless-plugin-aws-alerts
+  - serverless-pseudo-parameters
+custom:
+  defaultStage: dev
+  pythonRequirements:
+    dockerizePip: non-linux

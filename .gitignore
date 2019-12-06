@@ -1,2 +1,5 @@
 *.lock
 .venv
+node_modules
+package*
+.serverless
