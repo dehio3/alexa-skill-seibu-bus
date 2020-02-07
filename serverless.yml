@@ -32,4 +32,5 @@ plugins:
 custom:
   defaultStage: dev
   pythonRequirements:
-    dockerizePip: non-linux
+    # dockerizePip: non-linux
+    usePipenv: false
