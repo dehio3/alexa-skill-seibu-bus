@@ -33,3 +33,4 @@ sls plugin install -n serverless-pseudo-parameters
 ```
 sls deploy --verbose --stage dev --alexaskill <alexaSkill Id>
 ```
+
