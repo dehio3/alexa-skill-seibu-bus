@@ -16,7 +16,7 @@ functions:
     name: alexa-skill-seibu-bus
     description: Managed by Serverless Framework
     events:
-      - alexaSkill: ${opt:alexaskill}
+      - alexaSkill: ${param:alexaSkillId}
 
 package:
   exclude:
