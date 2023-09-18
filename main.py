@@ -24,7 +24,7 @@ def buss_time(url):
                         http://transfer.navitime.biz/seibubus-dia/pc/map/Top?window=busLocation
 
     Return:
-        str: 到着予定時刻 (ex:約10分,約20分,約24)
+        list: 到着予定時刻 (ex:['約2分', '約16分', '約30分'])
     """
 
     html = urllib.request.urlopen(url)
@@ -75,28 +75,39 @@ def buss_time(url):
             # パス→何も処理を行わない
             pass
 
-    # 到着時間のリストを文字列として連結
-    message = ','.join(time_list)
-
-    return message
+    return time_list
 
 
 def main(event, context):
     # リストの作成
-    time_messages = []
+    arrival_time = {}
+    output_speech = []
 
     for key, value in URL.items():
         # バス停毎の待ち時間を取得
-        time = buss_time(value)
+        time_list = buss_time(value)
 
-        # メッセージを作成
+        # 画面表示用辞書型を作成
+        # {'交番前': ['約14分', '約26分', '約31分']}
+        arrival_time[key] = time_list
+
+        # 読み上げメッセージを作成
         # ex) 交番前は,約11分,約24分,約28分
-        time_message = '{0}は,{1}'.format(key, time)
+        msg = ','.join(time_list)
+        msg = '{0}は,{1}'.format(key, msg)
         # 全てのバス停のメッセージを結合
-        time_messages.append(time_message)
+        output_speech.append(msg)
 
     # リスト型のメッセージを文字列に変更
-    message = ','.join(time_messages)
+    message = ','.join(output_speech)
+
+    # ディスプレイメッセージを作成
+    # https://developer.amazon.com/ja/docs/custom-skills/display-interface-reference.html#supported-markup
+    display_text_content = ""
+    for key, value in arrival_time.items():
+        markup_message = '<font size="7">{}</font><br/><font size="5">{}</font><br/><br/>'.format(
+            key, ','.join(value))
+        display_text_content += markup_message
 
     response = {
         'version': '1.0',
@@ -104,7 +115,25 @@ def main(event, context):
             'outputSpeech': {
                 'type': 'PlainText',
                 'text': message + 'で到着します',
-            }
+            },
+            "directives": [
+                {
+                    "type": "Display.RenderTemplate",
+                    "template": {
+                        "type": "BodyTemplate1",
+                        "token": "TimeTable1",
+                        "backButton": "VISIBLE",
+                        "title": "バスの接近情報",
+                        "textContent": {
+                            "primaryText": {
+                                "text": display_text_content,
+                                "type": "RichText"
+                            }
+                        }
+                    }
+                }
+            ],
+            "shouldEndSession": "true"
         }
     }
 
